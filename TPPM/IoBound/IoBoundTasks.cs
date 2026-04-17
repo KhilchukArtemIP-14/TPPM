@@ -22,7 +22,7 @@ namespace TPPM.IoBound
             int chunk = totalFiles / threadCount;
             int remainder = totalFiles % threadCount;
 
-            Parallel.For(0, threadCount, options, (threadNum) =>
+            Parallel.For(0, threadCount, options, async (threadNum) =>
             {
                 int startIndex = threadNum * chunk + (threadNum < remainder ? threadNum : remainder);
                 int endIndex = startIndex + chunk + (threadNum < remainder ? 1 : 0);
@@ -34,21 +34,9 @@ namespace TPPM.IoBound
                     string filePath = files[i];
                     try
                     {
-                        string text = File.ReadAllText(filePath);
+                        string text = await File.ReadAllTextAsync(filePath);
 
-                        bool inWord = false;
-                        for (int c = 0; c < text.Length; c++)
-                        {
-                            if (char.IsWhiteSpace(text[c]))
-                            {
-                                inWord = false;
-                            }
-                            else if (!inWord)
-                            {
-                                localThreadCount++;
-                                inWord = true;
-                            }
-                        }
+                        localThreadCount += text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
                     }
                     catch (Exception ex)
                     {

@@ -18,28 +18,22 @@ namespace TPPM.CpuBound
             int baseIterations = iterations / threadCount;
             int remainder = iterations % threadCount;
 
-            Parallel.For(0, threadCount, options,
-                () => 0,
-                (i, _, localCount) =>
+            Parallel.For(0, threadCount, options, i =>
+            {
+                int localCount = 0;
+
+                int iterationsCount = baseIterations + (remainder > i ? 1 : 0);
+                var rnd = ThreadSafeRandom.CurrentThreadRandom;
+
+                for (int j = 0; j < iterationsCount; j++)
                 {
-                    int iterationsCount = baseIterations + (remainder > i? 1 : 0);
-
-                    var rnd = ThreadSafeRandom.CurrentThreadRandom;
-
-                    for (int j =0; j < iterationsCount; j++)
-                    {
-                        double x = rnd.NextDouble();
-                        double y = rnd.NextDouble();
-                        if (x * x + y * y <= 1.0) localCount++;
-                    }
-
-                    return localCount;
-                },
-                (localCount) =>
-                {
-                    Interlocked.Add(ref globalCount, localCount);
+                    double x = rnd.NextDouble();
+                    double y = rnd.NextDouble();
+                    if (x * x + y * y <= 1.0) localCount++;
                 }
-            );
+
+                Interlocked.Add(ref globalCount, localCount);
+            });
 
             return (double)globalCount / iterations * 4.0;
         }
@@ -67,20 +61,6 @@ namespace TPPM.CpuBound
             });
 
             return new List<int>(primes);
-        }
-
-        private bool IsPrime(int number)
-        {
-            if (number < 2) return false;
-            if (number == 2) return true;
-            if (number % 2 == 0) return false;
-
-            int boundary = (int)Math.Floor(Math.Sqrt(number));
-            for (int i = 3; i <= boundary; i += 2)
-            {
-                if (number % i == 0) return false;
-            }
-            return true;
         }
 
         public List<long> FactorizeNumber(long number, int threadCount)
@@ -129,6 +109,20 @@ namespace TPPM.CpuBound
             factors.Add(number);
 
             return factors.ToList();
+        }
+
+        private bool IsPrime(int number)
+        {
+            if (number < 2) return false;
+            if (number == 2) return true;
+            if (number % 2 == 0) return false;
+
+            int boundary = (int)Math.Floor(Math.Sqrt(number));
+            for (int i = 3; i <= boundary; i += 2)
+            {
+                if (number % i == 0) return false;
+            }
+            return true;
         }
     }
 }

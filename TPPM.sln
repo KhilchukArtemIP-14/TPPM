@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPPM", "TPPM\TPPM.csproj", "{91446C68-46E2-4300-9171-AD24A58C6EF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPPM_Lab1", "TPPM\TPPM_Lab1.csproj", "{91446C68-46E2-4300-9171-AD24A58C6EF9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPPM_Lab2", "TPPM_Lab2\TPPM_Lab2.csproj", "{A887B02B-99D1-4D0F-893D-E4C48D105344}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPPM_Lab3", "TPPM_Lab3\TPPM_Lab3.csproj", "{8C12B6D0-44DE-44E9-9871-BF9075146474}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{91446C68-46E2-4300-9171-AD24A58C6EF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91446C68-46E2-4300-9171-AD24A58C6EF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91446C68-46E2-4300-9171-AD24A58C6EF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A887B02B-99D1-4D0F-893D-E4C48D105344}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A887B02B-99D1-4D0F-893D-E4C48D105344}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A887B02B-99D1-4D0F-893D-E4C48D105344}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A887B02B-99D1-4D0F-893D-E4C48D105344}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C12B6D0-44DE-44E9-9871-BF9075146474}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C12B6D0-44DE-44E9-9871-BF9075146474}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C12B6D0-44DE-44E9-9871-BF9075146474}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C12B6D0-44DE-44E9-9871-BF9075146474}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

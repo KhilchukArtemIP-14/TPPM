@@ -26,37 +26,42 @@ namespace TPPM_Lab3.Task2.NamedPipe
             _accessor.WaitForConnection();
         }
 
-        public async Task MainTask()
+        public async Task MainTask(bool verbose = false)
         {
             int value = _random.Next(int.MinValue, int.MaxValue);
 
-            // 1. Відправляємо в трубу
+            if (verbose) await Console.Out.WriteLineAsync($"Sending value: {value}");
+
             _accessor.Write(value);
 
-            // 2. Читаємо з труби. Потік сам почекає, поки Python не відповість!
             value = _accessor.Read();
-        }
 
+            if (verbose) await Console.Out.WriteLineAsync($"Recieved value: {value}");
+        }
+        public async Task MainTask(int iterations)
+        {
+            for (int i = 0; i < iterations; i++)
+            {
+                int value = _random.Next(int.MinValue, int.MaxValue);
+
+                _accessor.Write(value);
+
+                value = _accessor.Read();
+            }
+        }
         public async Task Subtask()
         {
-            // Створюємо КЛІЄНТА, який підключається до труби (на локальній машині ".")
             using var clientStream = new NamedPipeClientStream(".", Name, PipeDirection.InOut, PipeOptions.Asynchronous);
 
-            // Чекаємо, поки сервер (MainTask) створить трубу і буде готовий
             await clientStream.ConnectAsync();
 
             using var reader = new BinaryReader(clientStream);
             using var writer = new BinaryWriter(clientStream);
 
-            // Читаємо число від MainTask
             int value = reader.ReadInt32();
 
-            // ЗАКОМЕНТОВАНО ДЛЯ БЕНЧМАРКУ:
-            // await System.IO.File.AppendAllTextAsync("named_pipe_log_csharp.txt", $"Sub-thread int recieved back:{value}; Writing the negative\n");
-
-            // Відправляємо число помножене на -1
             writer.Write(value * -1);
-            writer.Flush(); // Обов'язково виштовхуємо дані
+            writer.Flush(); 
         }
 
         public void Dispose()

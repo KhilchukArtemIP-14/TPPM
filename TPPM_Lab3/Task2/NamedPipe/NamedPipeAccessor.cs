@@ -33,9 +33,7 @@ namespace TPPM_Lab3.Task2.NamedPipe
         {
             if (!_serverStream.IsConnected)
             {
-                Console.WriteLine("Waiting for client connection...");
                 _serverStream.WaitForConnection();
-                Console.WriteLine("Connected!");
             }
         }
 

@@ -5,6 +5,9 @@ using TPPM_Lab3.Task1;
 using TPPM_Lab3.Task2.NamedPipe;
 using TPPM_Lab3.Task2.SharedMemory;
 using TPPM_Lab3.Task2.Socket;
+using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Toolchains.InProcess.Emit;
+using TPPM_Lab3.Utils;
 
 namespace TPPM_Lab3
 {
@@ -49,7 +52,7 @@ namespace TPPM_Lab3
                 Console.WriteLine($"Final balance: {deadlockFinal}");
                 Console.WriteLine($"Balance diff: {deadlockFinal - deadlockInitial}\n");
             }
-
+            
             Console.WriteLine("===Simulating safe bank transfer logic===");
             var goodBank = new Bank(100, new TransferSafe());
 
@@ -61,8 +64,10 @@ namespace TPPM_Lab3
             decimal goodFinal = goodBank.TotalBalance;
             Console.WriteLine($"Final balance: {goodFinal}");
             Console.WriteLine($"Balance diff: {goodFinal - goodInitial}\n");
-
-
+            
+            var config = DefaultConfig.Instance
+                .AddJob(Job.Default.WithToolchain(InProcessEmitToolchain.Instance))
+                .WithOptions(ConfigOptions.DisableLogFile);
 
             Console.WriteLine("Would you like to run SharedMemory benchmarks? y/n");
             key = Console.ReadLine();
@@ -73,7 +78,6 @@ namespace TPPM_Lab3
             }
             if (key == "y")
             {
-                var config = DefaultConfig.Instance;
                 BenchmarkRunner.Run<SharedMemoryBenchmarks>(config, args);
             }
 
@@ -86,7 +90,6 @@ namespace TPPM_Lab3
             }
             if (key == "y")
             {
-                var config = DefaultConfig.Instance;
                 BenchmarkRunner.Run<NamedPipeBenchmarks>(config, args);
             }
 
@@ -100,21 +103,53 @@ namespace TPPM_Lab3
             }
             if (key == "y")
             {
-                var config = DefaultConfig.Instance;
                 BenchmarkRunner.Run<SocketBenchmarks>(config, args);
             }
 
-            Console.WriteLine("=== Тестування Shared Memory (C# <-> C#) ===");
+            Console.WriteLine("=== Shared Memory (C# <-> C#) ===");
 
-            using (var smTasks = new SharedMemoryTasks("LocalTestMem"))
+            using (var smTasks = new SharedMemoryTasks("MTPP_Mem"))
             {
-                var subTask = Task.Run(() => smTasks.Subtask());
-                var mainTask = Task.Run(() => smTasks.MainTask());
+                string smPythonScriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Task2", "SharedMemory", "python", "SharedMemorySubthread.py");
+                using (var smPythonProcess = new PythonSubprocessManager(smPythonScriptPath))
+                {
+                    //var subTask = Task.Run(() => smTasks.Subtask());
+                    var mainTask = Task.Run(() => smTasks.MainTask(true));
 
-                await Task.WhenAll(mainTask, subTask);
+                    await Task.WhenAll(mainTask);
+                }
             }
 
-            Console.WriteLine("=== Обмін успішно завершено! ===");
+            Console.WriteLine("=== Named Pipe (C# <-> C#) ===");
+
+            using (var smTasks = new NamedPipeTasks("MTPP_Pipe"))
+            {
+                string npPythonScriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Task2", "NamedPipe", "python", "NamedPipeSubthread.py");
+                using (var npPythonProcess = new PythonSubprocessManager(npPythonScriptPath))
+                {
+                    smTasks.WaitForClient();
+
+                    //var subTask = Task.Run(() => smTasks.Subtask());
+                    var mainTask = Task.Run(() => smTasks.MainTask(true));
+
+                    await Task.WhenAll(mainTask);
+                }
+            }
+
+            Console.WriteLine("=== Sockets (C# <-> C#) ===");
+
+            using (var smTasks = new SocketTasks())
+            {
+                string socketPythonScriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Task2", "Socket", "python", "SocketSubthread.py");
+                using(var socketPythonProcess = new PythonSubprocessManager(socketPythonScriptPath))
+                {
+                    smTasks.WaitForClient();
+                    //var subTask = Task.Run(() => smTasks.Subtask());
+                    var mainTask = Task.Run(() => smTasks.MainTask(true));
+
+                    await Task.WhenAll(mainTask);
+                }
+            }
         }
     }
 }

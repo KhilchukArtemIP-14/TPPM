@@ -25,9 +25,11 @@ namespace TPPM_Lab3.Task2.SharedMemory
             _dataProcessedEvent = new EventWaitHandle(false, EventResetMode.AutoReset, $"{Name}_DataProcessed");
         }
 
-        public async Task MainTask()
+        public async Task MainTask(bool verbose = false)
         {
             int value = _random.Next(int.MinValue, int.MaxValue);
+
+            if(verbose) await Console.Out.WriteLineAsync($"Sending value: {value}");
 
             _accessor.Write(value);
 
@@ -36,6 +38,24 @@ namespace TPPM_Lab3.Task2.SharedMemory
             _dataProcessedEvent.WaitOne();
 
             value = _accessor.Read();
+
+            if (verbose) await Console.Out.WriteLineAsync($"Recieved value: {value}");
+        }
+
+        public async Task MainTask(int iterations)
+        {
+            for (int i = 0; i < iterations; i++)
+            {
+                int value = _random.Next(int.MinValue, int.MaxValue);
+
+                _accessor.Write(value);
+
+                _dataReadyEvent.Set();
+
+                _dataProcessedEvent.WaitOne();
+
+                value = _accessor.Read();
+            }
         }
 
         public async Task Subtask()
